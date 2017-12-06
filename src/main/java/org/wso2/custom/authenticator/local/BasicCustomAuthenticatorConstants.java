@@ -22,14 +22,7 @@ package org.wso2.custom.authenticator.local;
  */
 public abstract class BasicCustomAuthenticatorConstants {
 
-    public static final String AUTHENTICATOR_NAME = "ImpBasic";
-    public static final String AUTHENTICATOR_FRIENDLY_NAME = "imp-basic";
-    public static final String USER_NAME = "username";
-    public static final String PASSWORD = "password";
-    public static final String FAILED_USERNAME = "&failedUsername=";
-    public static final String ERROR_CODE = "&errorCode=";
-    public static final String AUTHENTICATORS = "&authenticators=";
-    public static final String LOCAL = "LOCAL";
-    public static final String UTF_8 = "UTF-8";
+    public static final String AUTHENTICATOR_NAME = "ImpersonationBasicAuthenticator";
+    public static final String AUTHENTICATOR_FRIENDLY_NAME = "identity-impersonation";
 
 }
