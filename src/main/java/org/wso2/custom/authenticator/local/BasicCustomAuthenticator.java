@@ -46,8 +46,8 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
     private static final String DEFAULT_IMP_ADMIN_ROLE = "Internal/impadmin";
     private static final String DEFAULT_IMP_USER_ROLE = "Internal/impuser";
     private static final String IMPERSONATEE = "impersonatee";
-    private static final String IMP_ADMIN_ROLE = "IMP_ADMIN";
-    private static final String IMP_USER_ROLE = "IMP_USER";
+    private static final String IMP_ADMIN_ROLE = "IMP_ADMIN_ROLE";
+    private static final String IMP_USER_ROLE = "IMP_USER_ROLE";
 
 
     @Override public AuthenticatorFlowStatus process(HttpServletRequest request, HttpServletResponse response,
