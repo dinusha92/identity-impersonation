@@ -1,2 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/*
+target/
+org.wso2.custom.authenticator.local.iml

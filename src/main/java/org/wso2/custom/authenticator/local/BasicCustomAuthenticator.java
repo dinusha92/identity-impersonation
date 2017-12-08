@@ -66,8 +66,8 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
                 if (context.getProperty(IMPERSONATEE) == null) {
                     context.setProperty(IMPERSONATEE, request.getParameter(IMPERSONATEE));
                 }
-                authenticatorFlowStatus = super.process(request, response, context);
             }
+            authenticatorFlowStatus = super.process(request, response, context);
             if (impAuthentication) {
                 //for the first time this will be INCOMPLETED because username & password = null
                 if (authenticatorFlowStatus.equals(AuthenticatorFlowStatus.SUCCESS_COMPLETED)) {
@@ -82,14 +82,30 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
                                 .getTenantAwareUsername(authenticatedUser.getAuthenticatedSubjectIdentifier()));
                         //check if the authenticated user has the impAdmin role
                         boolean hasRole = false;
-                        String impAdminRole = configParams.get(IMP_ADMIN_ROLE);
-                        if (impAdminRole == null || impAdminRole.isEmpty()) {
-                            impAdminRole = DEFAULT_IMP_ADMIN_ROLE;
-                        }
-                        for (String role : adminRoleList) {
-                            if (impAdminRole.equals(role)) {
-                                hasRole = true;
-                                break;
+                        //get all impersonator roles from configuration files
+                        String[] impAdminRoles = configParams.get(IMP_ADMIN_ROLE).split(",");
+                        //if configuration file does not contain properties use default role
+                        if (impAdminRoles.length == 0) {
+                            String impAdminRole = DEFAULT_IMP_ADMIN_ROLE;
+                            for (String role : adminRoleList) {
+                                if (impAdminRole.equals(role)) {
+                                    hasRole = true;
+                                    break;
+                                }
+                            }
+                        } else { //when roles are defined in configuration file (appication-authentication.xml)
+                            for (String impRole : impAdminRoles) {
+                                for (String adminRole : adminRoleList) {
+                                    if (impRole.equals(adminRole)) {
+                                        hasRole = true;
+                                        //break the loop when user is a match
+                                        break;
+                                    }
+                                }
+                                //breaking outer loop when role is found
+                                if (hasRole) {
+                                    break;
+                                }
                             }
                         }
 
@@ -97,41 +113,48 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
                         if (hasRole) {
                             //get the impersonatee's roles
                             UserRealm impUserRealm = getUserRealm((String) context.getProperty(IMPERSONATEE));
-                            String[] impUserRoles = impUserRealm.getUserStoreManager().getRoleListOfUser(MultitenantUtils
-                                    .getTenantAwareUsername((String) context.getProperty(IMPERSONATEE)));
+                            //check if the impersonatee exists in the user stores
+                            boolean userExists = realm.getUserStoreManager()
+                                    .isExistingUser((String) context.getProperty(IMPERSONATEE));
+                            //if user exists in the store do the impersonation authentication
+                            if (userExists) {
+                                String[] impUserRoles = impUserRealm.getUserStoreManager().getRoleListOfUser(
+                                        MultitenantUtils
+                                                .getTenantAwareUsername((String) context.getProperty(IMPERSONATEE)));
 
-                            String impUserRole = configParams.get(IMP_USER_ROLE);
-                            if (impUserRole == null || impUserRole.isEmpty()) {
-                                impUserRole = DEFAULT_IMP_USER_ROLE;
-                            }
-
-                            for (String role : impUserRoles) {
-                                //check if the impersonatee has the necessary role
-                                if (impUserRole.equals(role)) {
-                                    log.debug("Impersonatee is identified");
-                                    //set subject as impersonatee
-                                    AuthenticatedUser user = AuthenticatedUser
-                                            .createLocalAuthenticatedUserFromSubjectIdentifier(
-                                                    (String) context.getProperty(IMPERSONATEE));
-                                    context.setSubject(user);
-                                    return authenticatorFlowStatus;
+                                String impUserRole = configParams.get(IMP_USER_ROLE);
+                                if (impUserRole == null || impUserRole.isEmpty()) {
+                                    impUserRole = DEFAULT_IMP_USER_ROLE;
                                 }
-                            }
 
+                                for (String role : impUserRoles) {
+                                    //check if the impersonatee has the necessary role
+                                    if (impUserRole.equals(role)) {
+                                        log.debug("Impersonatee is identified");
+                                        //set subject as impersonatee
+                                        AuthenticatedUser user = AuthenticatedUser
+                                                .createLocalAuthenticatedUserFromSubjectIdentifier(
+                                                        (String) context.getProperty(IMPERSONATEE));
+                                        context.setSubject(user);
+                                        return authenticatorFlowStatus;
+                                    }
+                                }
+                            } else { //if user is not the user stores,authentication will not happen as the impersonation
+                                log.info("Impersonatee: " + context.getProperty(IMPERSONATEE)
+                                        + " is not presented in the user store.");
+                                /*Authenticator will still verify the authentication as impersonator, but not as the
+                                 impersonatee*/
+                                return authenticatorFlowStatus;
+                            }
                         }
                     } catch (org.wso2.carbon.user.api.UserStoreException e) {
                         String errorMessage = "Unable to get the user realm";
                         log.error(errorMessage, e);
                         throw new AuthenticationFailedException(errorMessage, e);
                     }
-                    return authenticatorFlowStatus;
-                } else { //if basic authentication is not success return its status
-                    return authenticatorFlowStatus;
                 }
-
-            } else { //if it is not a impersonation activity
-                return super.process(request, response, context);
             }
+            return authenticatorFlowStatus;
         }
     }
 
