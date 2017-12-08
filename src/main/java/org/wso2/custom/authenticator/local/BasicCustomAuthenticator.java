@@ -46,7 +46,7 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
     private static final String DEFAULT_IMP_ADMIN_ROLE = "Internal/impadmin";
     private static final String DEFAULT_IMP_USER_ROLE = "Internal/impuser";
     private static final String IMPERSONATEE = "impersonatee";
-    private static final String IMP_ADMIN_ROLE = "IMP_ADMIN_ROLE";
+    private static final String IMP_ADMIN_ROLES = "IMP_ADMIN_ROLES";
     private static final String IMP_USER_ROLE = "IMP_USER_ROLE";
 
 
@@ -83,7 +83,7 @@ public class BasicCustomAuthenticator extends BasicAuthenticator {
                         //check if the authenticated user has the impAdmin role
                         boolean hasRole = false;
                         //get all impersonator roles from configuration files
-                        String[] impAdminRoles = configParams.get(IMP_ADMIN_ROLE).split(",");
+                        String[] impAdminRoles = configParams.get(IMP_ADMIN_ROLES).split(",");
                         //if configuration file does not contain properties use default role
                         if (impAdminRoles.length == 0) {
                             String impAdminRole = DEFAULT_IMP_ADMIN_ROLE;

@@ -150,7 +150,7 @@
             <Parameter name="enableTOTP">false</Parameter>
         </AuthenticatorConfig>
         <AuthenticatorConfig name="ImpersonationBasicAuthenticator" enabled="true">
-            <Parameter name="IMP_ADMIN_ROLE">Internal/impersonator,Internal/impadmin</Parameter>
+            <Parameter name="IMP_ADMIN_ROLES">Internal/impersonator,Internal/impadmin</Parameter>
             <Parameter name="IMP_USER_ROLE">Internal/impersonatee</Parameter>
         </AuthenticatorConfig>
 
